@@ -23,15 +23,26 @@ module RSpec
 
       def matches?(subject)
         @subject = subject
-        attribute_exists? && type_correct? && default_value_correct?
+
+        @match_attribute_exists = attribute_exists?
+        @match_type_correct = type_correct?
+        @match_default_value_correct = default_value_correct?
+
+        @match_attribute_exists && @match_type_correct && @match_default_value_correct
       end
 
       def failure_message
-        "expected #{@attribute_name} to be defined"
+        msg = ["expected #{@attribute_name} to be defined"]
+        msg << "have correct type" if @options.has_key?(:type) && !@match_type_correct
+        msg << "have correct default value" if @options.has_key?(:default_value) && !@match_default_value_correct
+        msg.join(' and ')
       end
 
       def failure_message_when_negated
-        "expected #{@attribute_name} not to be defined"
+        msg = ["expected #{@attribute_name} not to be defined"]
+        msg << "not have correct type" if @options.has_key?(:type)
+        msg << "not have correct default value" if @options.has_key?(:default_value)
+        msg.join(' and ')
       end
 
       private
