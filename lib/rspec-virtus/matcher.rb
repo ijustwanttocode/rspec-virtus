@@ -16,9 +16,14 @@ module RSpec
         self
       end
 
+      def with_default(default_value)
+        @options[:default_value] = default_value
+        self
+      end
+
       def matches?(subject)
         @subject = subject
-        attribute_exists? && type_correct?
+        attribute_exists? && type_correct? && default_value_correct?
       end
 
       def failure_message
@@ -47,11 +52,23 @@ module RSpec
         attribute != nil
       end
 
+      def attribute_default_value
+        attribute.default_value.value
+      end
+
       def type_correct?
         if @options[:member_type]
           member_type == @options[:member_type] && attribute_type == @options[:type]
         elsif @options[:type]
           attribute_type == @options[:type]
+        else
+          true
+        end
+      end
+
+      def default_value_correct?
+        if @options[:default_value]
+          attribute_default_value == @options[:default_value]
         else
           true
         end

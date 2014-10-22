@@ -10,6 +10,7 @@ describe RSpec::Virtus::Matcher do
 
     attribute :the_attribute, String
     attribute :the_array_attribute, Array[String]
+    attribute :the_integer_attribute_with_default, Integer, default: 5
   end
 
   describe '#matches?' do
@@ -38,6 +39,22 @@ describe RSpec::Virtus::Matcher do
       it { is_expected.to eql(true) }
     end
 
+    context 'successful match with default value' do
+      let(:attribute_name) { :the_integer_attribute_with_default }
+      before do
+        instance.with_default(5)
+      end
+      it { is_expected.to eql(true) }
+    end
+
+    context 'successful match with type and default value' do
+      let(:attribute_name) { :the_integer_attribute_with_default }
+      before do
+        instance.of_type(Integer).with_default(5)
+      end
+      it { is_expected.to eql(true) }
+    end
+
     context 'unsuccessful match on attribute name' do
       let(:attribute_name) { :something_else }
 
@@ -61,6 +78,22 @@ describe RSpec::Virtus::Matcher do
         instance.of_type(Array, member_type: Integer)
       end
 
+      it { is_expected.to eql(false) }
+    end
+
+    context 'unsuccessful match with default value' do
+      let(:attribute_name) { :the_integer_attribute_with_default }
+      before do
+        instance.with_default(-1)
+      end
+      it { is_expected.to eql(false) }
+    end
+
+    context 'unsuccessful match with type and default value' do
+      let(:attribute_name) { :the_integer_attribute_with_default }
+      before do
+        instance.of_type(Integer).with_default(-5)
+      end
       it { is_expected.to eql(false) }
     end
   end
@@ -91,6 +124,19 @@ describe RSpec::Virtus::Matcher do
         member_options_type = subject.instance_variable_get(:@options)[:member_type]
         expect(member_options_type).to eql(String)
       end
+    end
+  end
+
+  describe '#with_default' do
+    subject { instance.with_default('My Default') }
+
+    it 'returns itsself so it can be chained' do
+      expect(subject).to eql(instance)
+    end
+
+    it 'adds an option to allow the default value to be checked' do
+      options_default_value = subject.instance_variable_get(:@options)[:default_value]
+      expect(options_default_value).to eql('My Default')
     end
   end
 
